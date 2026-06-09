@@ -1,5 +1,5 @@
 {
-  description = "Declarative NAS flake providing UGreen LED controller & kernel Nix module";
+  description = " Nix flake that ports UGreen LED controller & kernel module";
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
@@ -12,15 +12,15 @@
     in
     {
       nixosModules = {
-        default = self.nixosModules.nixnas;
-        nixnas = ./modules;
+        default = self.nixosModules.ugreen-led;
+        ugreen-led = ./modules;
       };
 
       overlays.default = final: prev: {
         ugreen-leds = prev.callPackage ./pkgs/ugreen-leds { };
       };
 
-      # 'nix build .#package' - inputs.nixnas.packages.${system}.<package>
+      # 'nix build .#package' - inputs.ugreen-led.packages.${system}.<package>
       packages = forEachSystem (
         system:
         let

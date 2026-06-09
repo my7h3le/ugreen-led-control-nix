@@ -61,10 +61,8 @@ in
           };
 
           smart = {
-            enable = lib.mkOption {
-              type = lib.types.bool;
+            enable = lib.mkEnableOption "Whether to enable checking the disk health via smartctl. The default is true." // {
               default = true;
-              description = "Whether to enable checking the disk health via smartctl. The default is true.";
             };
 
             fail = lib.mkOption {

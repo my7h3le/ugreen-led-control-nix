@@ -1,22 +1,18 @@
-# NixNAS
+# UGreen-LED NixOS Module
 
-This flake repository serves multiple purposes:
-
-* Provide the UGreen LED bin & kernel module that I've packaged for Nix.
-* My configuration files for servers dedicated to running a NAS.
-
-Setup instructions are available below.
+This flake provides the UGreen LED bin(s) & kernel module that I've packaged
+for Nix, as well as a declarative NixOS module.
 
 ---
 
-## UGreen LED Packages
+## Setup
 
 ### 01. Add flake input
 
 Inside your flake.nix file, add the following to your inputs:
 
 ```nix
-inputs.nixnas.url = "github:j-pap/NixNAS";
+inputs.ugreen-led.url = "github:j-pap/UGreen-LED-Nix";
 ```
 
 ### 02. Set overlay
@@ -24,10 +20,10 @@ inputs.nixnas.url = "github:j-pap/NixNAS";
 Add the input's overlay to your system:
 
 ```nix
-nixpkgs.overlays = [ inputs.nixnas.overlays.default ];
+nixpkgs.overlays = [ inputs.ugreen-led.overlays.default ];
 ```
 
-### 03. Add i2c to extraGroups
+### 03. Add i2c to your user's extra groups
 
 ```nix
 users.users.<name>.extraGroups = [
@@ -92,22 +88,8 @@ config.ugreen.leds = {
 };
 ```
 
-#### Credits
-
-[miskcoo](https://github.com/miskcoo) for creating the initial [LED Controller](https://github.com/miskcoo/ugreen_leds_controller).
-
 ---
 
-## NixNAS Installation
+## Credits
 
-All servers share a common configuration via hosts/default.nix. Any
-server-specific configurations are then set by their respective host directory.
-
-### Quick Deployment
-
-```
-nix run github:nix-community/disko -- --mode disko --flake github:j-pap/NixNAS#<server>
-mkdir -p /mnt/etc/nixos
-git clone https://github.com/j-pap/NixNAS.git /mnt/etc/nixos
-nixos-install --no-root-passwd --flake .#<server>
-```
+[miskcoo](https://github.com/miskcoo) for creating the initial [LED Controller](https://github.com/miskcoo/ugreen_leds_controller).
