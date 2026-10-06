@@ -25,7 +25,12 @@ in
       disk = {
         serials = lib.mkOption {
           type = lib.types.listOf lib.types.str;
-          default = [ ];
+          default = [
+            "SN1"
+            "SN2"
+            "SN3"
+            "SN4"
+          ];
           description = "List of disk serial numbers, in order, starting from disk 1 - #.";
           example = [
             "S987F2K" # Disk 1
@@ -61,9 +66,11 @@ in
           };
 
           smart = {
-            enable = lib.mkEnableOption "Whether to enable checking the disk health via smartctl. The default is true." // {
-              default = true;
-            };
+            enable =
+              lib.mkEnableOption "Whether to enable checking the disk health via smartctl. The default is true."
+              // {
+                default = true;
+              };
 
             fail = lib.mkOption {
               type = lib.types.str;

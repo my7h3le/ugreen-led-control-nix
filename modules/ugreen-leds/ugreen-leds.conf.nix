@@ -27,7 +27,7 @@
     #   serial: suggested, mapping by serial
     #           this method requires the user to check the disks' serial numbers
     #           and fill the DISK_SERIAL array below (see the comments therein).
-    MAPPING_METHOD=serial
+    MAPPING_METHOD=ata
 
     # The path of the compiled diskio monitor (OPTIONAL) 
     BLINK_MON_PATH=${lib.getExe' pkgs.ugreen-leds "ugreen-blink-disk"}
