@@ -8,6 +8,23 @@ let
   cfg = config.ugreen.leds;
 
   ugreen-led-kmod = config.boot.kernelPackages.callPackage ../../pkgs/ugreen-led-kmod { };
+
+  kernelVersion = config.boot.kernelPackages.kernel.modDirVersion;
+
+  kernelCheck = pkgs.writeShellScript "ugreen-kernel-check" ''
+    running="$(${pkgs.coreutils}/bin/uname -r)"
+    expected="${kernelVersion}"
+
+    if [ "$running" != "$expected" ]; then
+      echo "UGREEN LED services skipped:"
+      echo "  running kernel:    $running"
+      echo "  generation kernel: $expected"
+      echo "  reboot required to activate the new kernel"
+      exit 1
+    fi
+
+    exit 0
+  '';
 in
 {
   options.ugreen.leds =
@@ -187,9 +204,10 @@ in
       etc."ugreen-leds.conf" = import ./ugreen-leds.conf.nix {
         inherit lib pkgs cfg;
       };
-      systemPackages = [
-        pkgs.i2c-tools
-        pkgs.ugreen-leds
+      systemPackages = with pkgs; [
+        i2c-tools
+        ugreen-leds
+        smartmontools
       ];
     };
 
@@ -202,7 +220,8 @@ in
           Requires = [ "ugreen-probe-leds.service" ];
         };
         serviceConfig = {
-          ExecStart = "${lib.getExe' pkgs.ugreen-leds "ugreen-diskomon"}";
+          ExecCondition = kernelCheck;
+          ExecStart = "${lib.getExe' pkgs.ugreen-leds "ugreen-diskiomon"}";
           StandardOutput = "journal";
         };
         wantedBy = [ "multi-user.target" ];
@@ -220,6 +239,7 @@ in
           Wants = [ "network-online.target" ];
         };
         serviceConfig = {
+          ExecCondition = kernelCheck;
           ExecStart = "${lib.getExe' pkgs.ugreen-leds "ugreen-netdevmon-multi"}";
           Restart = "on-failure";
           RestartSec = "10s";
@@ -236,6 +256,7 @@ in
           Requires = [ "ugreen-probe-leds.service" ];
         };
         serviceConfig = {
+          ExecCondition = kernelCheck;
           ExecStart = "${lib.getExe' pkgs.ugreen-leds "ugreen-netdevmon"} %i";
           StandardOutput = "journal";
         };
@@ -251,6 +272,7 @@ in
         };
         serviceConfig = {
           Type = "oneshot";
+          ExecCondition = kernelCheck;
           ExecStart = "${lib.getExe' pkgs.ugreen-leds "ugreen-power-led"}";
           RemainAfterExit = true;
           StandardOutput = "journal";
@@ -267,6 +289,14 @@ in
         };
         serviceConfig = {
           Type = "oneshot";
+
+          ExecCondition = kernelCheck;
+          ExecStartPre = ''
+            ${pkgs.kmod}/bin/modprobe \
+              --dirname ${config.system.modulesTree} \
+              --set-version ${kernelVersion} \
+              led-ugreen
+          '';
           ExecStart = "${lib.getExe' pkgs.ugreen-leds "ugreen-probe-leds"}";
           RemainAfterExit = true;
           StandardOutput = "journal";

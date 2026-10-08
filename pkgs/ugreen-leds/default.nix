@@ -2,8 +2,14 @@
   lib,
   stdenv,
   fetchFromGitHub,
+  makeWrapper,
   pkg-config,
   smartmontools,
+  pkgs,
+  kmod,
+  i2c-tools,
+  which,
+  dmidecode,
 }:
 
 stdenv.mkDerivation (finalAttrs: {
@@ -17,9 +23,19 @@ stdenv.mkDerivation (finalAttrs: {
     hash = "sha256-33ZQ8wMEiOHIo0/88wIWq9my6N0bDK8GczJlajzWTlM=";
   };
 
-  nativeBuildInputs = [ pkg-config ];
+  nativeBuildInputs = [
+    pkg-config
+    makeWrapper
+  ];
 
-  buildInputs = [ smartmontools ];
+  buildInputs = [
+    smartmontools
+    kmod
+    i2c-tools
+    pkgs.gawk
+    which
+    dmidecode
+  ];
 
   postPatch = ''
     substituteInPlace cli/Makefile \
@@ -44,9 +60,34 @@ stdenv.mkDerivation (finalAttrs: {
     mkdir -p $out/bin
     chmod +x scripts/ugreen-power-led
     cp cli/ugreen_leds_cli $out/bin/ugreen_leds_cli
-    cp -r scripts/ugreen-* $out/bin && rm $out/bin/ugreen-leds.conf
+    cp -r scripts/ugreen-* $out/bin
 
-    runHook postInstall
+    # Purge the following script files from bin directory
+    rm $out/bin/ugreen-leds.conf
+    # rm $out/bin/ugreen-probe-leds
+    # rm $out/bin/ugreen-diskiomon
+
+    # Wrap the script to ensure lsmod, modprobe, etc are available
+    wrapProgram $out/bin/ugreen-diskiomon \
+      --prefix PATH : ${
+        lib.makeBinPath [
+          kmod
+          pkgs.gawk
+          which
+          dmidecode
+        ]
+      }
+
+    # Wrap the script to ensure lsmod, modprobe, and i2cdetect are available
+    wrapProgram $out/bin/ugreen-probe-leds \
+      --prefix PATH : ${
+        lib.makeBinPath [
+          kmod
+          i2c-tools
+        ]
+      }
+
+    # runHook postInstall
   '';
 
   meta = {
