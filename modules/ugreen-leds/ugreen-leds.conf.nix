@@ -33,7 +33,7 @@
     BLINK_MON_PATH=${lib.getExe' pkgs.ugreen-leds "ugreen-blink-disk"}
 
     # The path of the compiled standby monitor (OPTIONAL) 
-    STANDBY_MON_PATH=${lib.getExe' pkgs.ugreen-leds "check-standby"}
+    STANDBY_MON_PATH=${lib.getExe' pkgs.ugreen-leds "ugreen-check-standby"}
 
     # The sleep time between disk standby checks (default: 1 seconds)
     STANDBY_CHECK_INTERVAL=1
