@@ -39,6 +39,23 @@ in
     {
       enable = lib.mkEnableOption "UGreen LED controller module";
 
+      cli.enable = lib.mkOption {
+        type = lib.types.bool;
+        default = false;
+        description = "Whether to install and make the `ugreen_leds_cli` tool available.";
+      };
+
+      service.enable = lib.mkOption {
+        type = lib.types.bool;
+        default = true;
+        description = ''
+          Whether to enable the systemd services for automatic disk, network, and
+          power LED management. When enabled, the services use the led-ugreen
+          kernel module to control the LEDs, and the ugreen_leds_cli cli tool
+          can not be used concurrently.
+        '';
+      };
+
       disk = {
         serials = lib.mkOption {
           type = lib.types.listOf lib.types.str;
@@ -200,16 +217,16 @@ in
 
     hardware.i2c.enable = true;
 
-    environment = {
-      etc."ugreen-leds.conf" = import ./ugreen-leds.conf.nix {
-        inherit lib pkgs cfg;
-      };
-      systemPackages = with pkgs; [
-        i2c-tools
-        ugreen-leds
-        smartmontools
-      ];
+    environment.etc."ugreen-leds.conf" = import ./ugreen-leds.conf.nix {
+      inherit lib pkgs cfg;
     };
+    environment.systemPackages =
+      with pkgs;
+      [
+        i2c-tools
+        smartmontools
+      ]
+      ++ lib.optional (cfg.cli.enable) ugreen-leds;
 
     systemd.services = {
       ugreen-diskiomon = {
@@ -304,5 +321,20 @@ in
         wantedBy = [ "multi-user.target" ];
       };
     };
+
+    assertions = [
+      {
+        assertion = !(cfg.cli.enable && cfg.service.enable);
+        message = ''
+          The UGREEN LED systemd services and ugreen_leds_cli cannot be used at
+          the same time because the CLI conflicts with the led-ugreen kernel
+          module used by the services. Either set
+          `config.ugreen.leds.cli.enable` or
+          `config.ugreen.leds.service.enable`.
+
+          See: https://github.com/miskcoo/ugreen_leds_controller/blob/f0fcd8192abdd92244aba9f6f0d10572f5561380/README.md?plain=1#L97-L99
+        '';
+      }
+    ];
   };
 }
