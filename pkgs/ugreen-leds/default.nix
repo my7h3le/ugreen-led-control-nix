@@ -14,13 +14,13 @@
 
 stdenv.mkDerivation (finalAttrs: {
   pname = "ugreen-leds";
-  version = "0.3.1";
+  version = "0.3-unstable-2026-09-27";
 
   src = fetchFromGitHub {
-    owner = "miskcoo";
+    owner = "my7h3le";
     repo = "ugreen_leds_controller";
-    rev = "0c4b19d397306bd96f69dd838c463db5781f95ea";
-    hash = "sha256-33ZQ8wMEiOHIo0/88wIWq9my6N0bDK8GczJlajzWTlM=";
+    rev = "36540c206f52f7f4cda21504f6391f22ddd903b6";
+    hash = "sha256-EvWTNxln8j8P67xHTF2TaDNnYtzFB6wz69ROgffiOx8=";
   };
 
   nativeBuildInputs = [
@@ -73,6 +73,7 @@ stdenv.mkDerivation (finalAttrs: {
         lib.makeBinPath [
           kmod
           pkgs.gawk
+          pkgs.flock
           which
           dmidecode
         ]
