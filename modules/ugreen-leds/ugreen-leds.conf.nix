@@ -41,7 +41,7 @@
     # Invert LED behavior for all LEDs - disk and network (default: 0)
     # 0 = dark when inactive, light on activity (normal behavior)
     # 1 = light when inactive, dark on activity (inverted behavior)
-    LED_INVERT=0
+    LED_INVERT=${lib.toString (if cfg.lightWhenInactive then 1 else 0)}
 
     # The serial numbers of disks (used only when MAPPING_METHOD=serial)
     # You need to record them before inserting to your NAS, and the corresponding disk slots.

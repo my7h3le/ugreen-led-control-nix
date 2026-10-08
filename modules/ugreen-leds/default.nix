@@ -47,12 +47,24 @@ in
 
       service.enable = lib.mkOption {
         type = lib.types.bool;
-        default = true;
+        default = false;
         description = ''
           Whether to enable the systemd services for automatic disk, network, and
           power LED management. When enabled, the services use the led-ugreen
           kernel module to control the LEDs, and the ugreen_leds_cli cli tool
           can not be used concurrently.
+        '';
+      };
+
+      lightWhenInactive = lib.mkOption {
+        type = lib.types.bool;
+        default = false;
+        description = ''
+          Whether disk and network LEDs should remain lit while inactive and turn
+          off during activity.
+
+          When false, LEDs are off while inactive and light up on activity.
+          When true, LEDs are lit while inactive and turn off during activity.
         '';
       };
 
