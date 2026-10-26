@@ -28,14 +28,6 @@ stdenv.mkDerivation (finalAttrs: {
     "INSTALL_MOD_PATH=$(out)"
   ];
 
-  installPhase = ''
-    runHook preInstall
-
-    install -D led-ugreen.ko -t $out/lib/modules/${kernel.modDirVersion}/extra
-
-    runHook postInstall
-  '';
-
   meta = {
     description = "Kernel module for UGREEN's DX/DXP NAS Series LED controller";
     homepage = "https://github.com/miskcoo/ugreen_leds_controller";
